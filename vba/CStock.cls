@@ -26,10 +26,6 @@ Property Get TickerID() As String
     TickerID = mStockTickerID
 End Property
 
-Property Get year() As Integer
-    year = mStockYear
-End Property
-
 Property Get InitialValue() As Double
     InitialValue = mStockInitialValue
 End Property
