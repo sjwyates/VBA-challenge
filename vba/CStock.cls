@@ -13,17 +13,23 @@ Option Explicit
 ' Declare fields
 ' ----------------------------------
 Private mStockTickerID As String
+Private mStockYear As Integer
 Private mStockInitialValue As Double
 Private mStockInitialDate As Long
 Private mStockFinalValue As Double
 Private mStockFinalDate As Long
 Private mStockTotalVolume As Variant
+Private mStockPercentChange As Double
 
 ' ----------------------------------
 ' Getters
 ' ----------------------------------
 Property Get TickerID() As String
     TickerID = mStockTickerID
+End Property
+
+Property Get StockYear() As Integer
+    StockYear = mStockYear
 End Property
 
 Property Get InitialValue() As Double
@@ -46,11 +52,27 @@ Property Get TotalVolume() As Variant
     TotalVolume = mStockTotalVolume
 End Property
 
+Property Get YearlyChange() As Double
+    YearlyChange = mStockFinalValue - mStockInitialValue
+End Property
+
+Property Get PercentChange() As Double
+    If mStockInitialValue = 0 Then
+        PercentChange = 0
+    Else
+        PercentChange = (mStockFinalValue - mStockInitialValue) / mStockInitialValue
+    End If
+End Property
+
 ' ----------------------------------
 ' Setters
 ' ----------------------------------
 Property Let TickerID(ByVal newTickerID As String)
     mStockTickerID = newTickerID
+End Property
+
+Property Let StockYear(ByVal year As Integer)
+    mStockYear = year
 End Property
 
 Property Let InitialValue(ByVal stockOpeningValue As Double)
