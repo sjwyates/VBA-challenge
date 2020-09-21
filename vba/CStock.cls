@@ -19,7 +19,6 @@ Private mStockInitialDate As Long
 Private mStockFinalValue As Double
 Private mStockFinalDate As Long
 Private mStockTotalVolume As Variant
-Private mStockPercentChange As Double
 
 ' ----------------------------------
 ' Getters
@@ -30,22 +29,6 @@ End Property
 
 Property Get StockYear() As Integer
     StockYear = mStockYear
-End Property
-
-Property Get InitialValue() As Double
-    InitialValue = mStockInitialValue
-End Property
-
-Property Get InitialDate() As Long
-    InitialDate = mStockInitialDate
-End Property
-
-Property Get FinalValue() As Double
-    FinalValue = mStockFinalValue
-End Property
-
-Property Get FinalDate() As Long
-    FinalDate = mStockFinalDate
 End Property
 
 Property Get TotalVolume() As Variant
@@ -67,35 +50,43 @@ End Property
 ' ----------------------------------
 ' Setters
 ' ----------------------------------
-Property Let TickerID(ByVal newTickerID As String)
-    mStockTickerID = newTickerID
+Property Let TickerID(ByVal theTickerID As String)
+    mStockTickerID = theTickerID
 End Property
 
-Property Let StockYear(ByVal year As Integer)
-    mStockYear = year
+Property Let StockYear(ByVal theYear As Integer)
+    mStockYear = theYear
 End Property
 
-Property Let InitialValue(ByVal stockOpeningValue As Double)
-    mStockInitialValue = stockOpeningValue
-End Property
+' ----------------------------------------
+' Set initial values
+' ----------------------------------------
+Public Sub InitializeValues(ByVal theOpeningValue As Double, _
+                              ByVal theClosingValue As Double, _
+                              ByVal theDate As Long, _
+                              ByVal theTotalVolume As Long)
+    mStockInitialValue = theOpeningValue
+    mStockInitialDate = theDate
+    mStockFinalValue = theClosingValue
+    mStockFinalDate = theDate
+    mStockTotalVolume = theTotalVolume
+End Sub
 
-Property Let InitialDate(ByVal stockDate As Long)
-    mStockInitialDate = stockDate
-End Property
-
-Property Let FinalValue(ByVal stockClosingValue As Double)
-    mStockFinalValue = stockClosingValue
-End Property
-
-Property Let FinalDate(ByVal stockDate As Long)
-    mStockFinalDate = stockDate
-End Property
-
-' ----------------------------------
-' Increment total volume
-' ----------------------------------
-Public Sub IncTotalVolume(ByVal stockVolume As Long)
-    mStockTotalVolume = mStockTotalVolume + stockVolume
+' ----------------------------------------
+' "Double setter" for initial/final values
+' ----------------------------------------
+Public Sub UpdateValues(ByVal theOpeningValue As Double, _
+                              ByVal theClosingValue As Double, _
+                              ByVal theDate As Long, _
+                              ByVal theTotalVolume As Long)
+    If theDate < mStockInitialDate Then
+        mStockInitialValue = theOpeningValue
+        mStockInitialDate = theDate
+    ElseIf theDate > mStockFinalDate Then
+        mStockFinalValue = theClosingValue
+        mStockFinalDate = theDate
+    End If
+    mStockTotalVolume = mStockTotalVolume + theTotalVolume
 End Sub
 
 ' ----------------------------------

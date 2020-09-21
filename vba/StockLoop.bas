@@ -3,126 +3,82 @@ Option Explicit
 
 Sub StockLoop()
 '   -----------------------------------
+'   Start a timer to check performance
+'   -----------------------------------
+    Dim startTime, stopTime, totalTime As Single
+    startTime = Timer
+'   -----------------------------------
 '   Instantiate a Collection object
 '   -----------------------------------
     Dim theStocks As Collection
     Set theStocks = New Collection
-'   -----------------------------------
-'   Find the last row in the table
-'   -----------------------------------
-    Dim lastRow As Long
-    lastRow = Cells(Rows.Count, 1).End(xlUp).row
-'   --------------------------------------------
-'   Clear existing contents/formats, set headers
-'   --------------------------------------------
-    With Cells
-        .ClearFormats
-        .HorizontalAlignment = xlCenter
-    End With
-    Range("I1:Z" & lastRow).ClearContents
-    Range("I1").Value = "Ticker"
-    Range("J1").Value = "Year"
-    Range("K1").Value = "Yearly Change"
-    Range("L1").Value = "Percent Change"
-    Range("M1").Value = "Total Stock Volume"
-    Range("O1").Value = "Category"
-    Range("P1").Value = "Ticker"
-    Range("Q1").Value = "Value"
-    Range("O2").Value = "Greatest % Increase"
-    Range("O3").Value = "Greatest % Decrease"
-    Range("O4").Value = "Greatest Total Volume"
-    Columns().ColumnWidth = 8
-    Columns("H").ColumnWidth = 1
-    Columns("N").ColumnWidth = 1
-    Columns("M").ColumnWidth = 11
-    Columns("G").ColumnWidth = 11
-    Columns("Q").ColumnWidth = 11
-    Columns("O").AutoFit
-'   -----------------------------------
-'   Add formatting to headers
-'   -----------------------------------
-    With Range("A1:G1,I1:M1,O1:Q1,O2:O4")
-        .Interior.Color = RGB(200, 200, 200)
-        .Borders.Color = 0
-    End With
-    Rows(1).WrapText = True
-'   -----------------------------------
-'   Dim variables for the loop
-'   -----------------------------------
-    Dim row As Long
-    Dim theStock As CStock
-    Dim theYear As Integer
-    Dim id As String
-    Dim exists As Boolean
-'   -----------------------------------
-'   Loop over all the rows
-'   -----------------------------------
-    For row = 2 To lastRow
-        ' Call util function to get the year
-        theYear = YearFromDate(Cells(row, 2).Value)
-        ' Create a unique ID to use as key in collection
-        id = Cells(row, 1).Value & "_" & theYear
-        ' Call util function to check if a stock already exists
-        exists = ExistsInCollection(id, theStocks)
-        ' If it doesn't exist yet, instantiate and set initial values
-        If exists = False Then
-            Set theStock = New CStock
-            With theStock
-                .TickerID = Cells(row, 1).Value
-                .StockYear = theYear
-                .InitialDate = Cells(row, 2).Value
-                .FinalDate = Cells(row, 2).Value
-                .InitialValue = Cells(row, 3).Value
-                .FinalValue = Cells(row, 6).Value
-                .IncTotalVolume Cells(row, 7).Value
-            End With
-            ' Add to collection with ID as key
-            theStocks.Add theStock, id
-        ' If it already exists, then edit it (with some logic)
-        ElseIf exists = True Then
-            Set theStock = theStocks.Item(id)
-            With theStock
-                If .InitialDate > Cells(row, 2).Value Then
-                    .InitialDate = Cells(row, 2).Value
-                    .InitialValue = Cells(row, 3).Value
-                End If
-                If .FinalDate < Cells(row, 2).Value Then
-                    .FinalDate = Cells(row, 2).Value
-                    .FinalValue = Cells(row, 6).Value
-                End If
-                .IncTotalVolume Cells(row, 7).Value
-            End With
-        End If
-    Next row
-'   -----------------------------------
-'   Loop variables
-'   -----------------------------------
-    Dim aStock As CStock
-    Dim i As Integer
-    i = 2
+'   ------------------------------------
+'   Loop #1: Loop through all worksheets
+'   ------------------------------------
+    Dim CurrentWS As Worksheet
+    For Each CurrentWS In Worksheets
+    '   -----------------------------------
+    '   Some variables for loops
+    '   -----------------------------------
+        Dim lastRow As Long
+        lastRow = CurrentWS.Cells(Rows.Count, 1).End(xlUp).row
+        Dim i As Long
+    '   -----------------------------------
+    '   Loop #2: Get data from CurrentWS
+    '   -----------------------------------
+        Dim sheetData As Variant
+        sheetData = CurrentWS.Range("A2:G" & lastRow).Value
+        
+        Dim theStock As CStock
+        Dim theYear As Integer
+        Dim id As String
+        Dim exists As Boolean
+        For i = 1 To UBound(sheetData, 1)
+            theYear = Round(sheetData(i, 2) / 10000, 0)
+            id = sheetData(i, 1) & "_" & theYear
+            exists = ExistsInCollection(id, theStocks)
+            If exists = False Then
+                Set theStock = New CStock
+                With theStock
+                    .TickerID = sheetData(i, 1)
+                    .StockYear = theYear
+                    .InitializeValues sheetData(i, 3), _
+                                      sheetData(i, 6), _
+                                      sheetData(i, 2), _
+                                      sheetData(i, 7)
+                    theStocks.Add theStock, id
+                End With
+            ElseIf exists = True Then
+                Set theStock = theStocks.Item(id)
+                With theStock
+                    .UpdateValues sheetData(i, 3), _
+                                  sheetData(i, 6), _
+                                  sheetData(i, 2), _
+                                  sheetData(i, 7)
+                End With
+            End If
+        Next i
+    Next CurrentWS
+'   ------------------------------------
+'   New worksheet to store combined data
+'   ------------------------------------
+    Set CurrentWS = ActiveWorkbook.Sheets.Add
+    CurrentWS.Name = "Analysis"
 '   -----------------------------------
 '   Greatest category variables
 '   -----------------------------------
-    Dim greatestPctIncrease As CStock
-    Dim greatestPctDecrease As CStock
-    Dim greatestTotalVolume As CStock
+    Dim greatestPctIncrease, _
+        greatestPctDecrease, _
+        greatestTotalVolume _
+    As CStock
     Set greatestPctIncrease = New CStock
     Set greatestPctDecrease = New CStock
     Set greatestTotalVolume = New CStock
-'   -----------------------------------
-'   Populate main table and find greatests
-'   -----------------------------------
+'   ------------------------------------------
+'   Loop #3: Find the greatests
+'   ------------------------------------------
+    Dim aStock As CStock
     For Each aStock In theStocks
-        ' Populate main table
-        With aStock
-            Cells(i, 9).Value = .TickerID
-            Cells(i, 10).Value = .StockYear
-            Cells(i, 11).Value = .YearlyChange
-            Cells(i, 12).Value = .PercentChange
-            Cells(i, 13).Value = .TotalVolume
-            i = i + 1
-        End With
-        ' Check if this is the greatest in any categories
         If aStock.PercentChange > greatestPctIncrease.PercentChange Then
             Set greatestPctIncrease = aStock
         End If
@@ -133,46 +89,93 @@ Sub StockLoop()
             Set greatestTotalVolume = aStock
         End If
     Next aStock
-'   -----------------------------------
-'   Basic table formatting
-'   -----------------------------------
-    With Range("A2:G" & lastRow & ",I2:M" & theStocks.Count + 1 & ",O2:Q4")
-        .Borders.Color = 0
-        .VerticalAlignment = xlCenter
-    End With
-    Range("L2:L" & theStocks.Count + 1 & ",Q2:Q3").NumberFormat = "0.00%"
-    Range("M2:M" & theStocks.Count + 1 & ",O2:O4").ShrinkToFit = True
+'   ------------------------------------------
+'   Loop #4: Populate stock table
+'   ------------------------------------------
+    i = 2
+    For Each aStock In theStocks
+        With aStock
+            CurrentWS.Cells(i, 1).Value = .TickerID
+            CurrentWS.Cells(i, 2).Value = .StockYear
+            CurrentWS.Cells(i, 3).Value = .YearlyChange
+            CurrentWS.Cells(i, 4).Value = .PercentChange
+            CurrentWS.Cells(i, 5).Value = .TotalVolume
+            i = i + 1
+        End With
+    Next aStock
 '   -----------------------------------
 '   Populate greatest categories table
 '   -----------------------------------
-    Range("P2").Value = greatestPctIncrease.TickerID
-    Range("Q2").Value = greatestPctIncrease.PercentChange
-    Range("P3").Value = greatestPctDecrease.TickerID
-    Range("Q3").Value = greatestPctDecrease.PercentChange
-    Range("P4").Value = greatestTotalVolume.TickerID
-    Range("Q4").Value = greatestTotalVolume.TotalVolume
-'   ----------------------------------------
-'   Conditional formatting for yearly change
-'   ----------------------------------------
-    With Columns("K")
-        .FormatConditions.Delete
-        .FormatConditions.Add(xlCellValue, xlGreater, "=0") _
-            .Interior.Color = RGB(50, 255, 50)
-        .FormatConditions.Add(xlCellValue, xlLess, "=0") _
-            .Interior.Color = RGB(255, 50, 50)
+    With CurrentWS
+        .Range("H2").Value = greatestPctIncrease.TickerID
+        .Range("I2").Value = greatestPctIncrease.PercentChange
+        .Range("H3").Value = greatestPctDecrease.TickerID
+        .Range("I3").Value = greatestPctDecrease.PercentChange
+        .Range("H4").Value = greatestTotalVolume.TickerID
+        .Range("I4").Value = greatestTotalVolume.TotalVolume
     End With
-    Range("K1").FormatConditions.Delete
-'   ----------------------------------------
-'   Lastly, select cell A1 (as a nicety)
-'   ----------------------------------------
-    Range("A1").Select
-
+'   -----------------------------------
+'   Add header titles
+'   -----------------------------------
+    Dim headerTitles() As String
+    headerTitles = Split("Ticker|Year|Yearly Change|Percent Change|Total Stock Volume||Category|Ticker|Value", "|")
+    For i = 0 To UBound(headerTitles)
+        CurrentWS.Cells(1, i + 1).Value = headerTitles(i)
+    Next i
+'   -----------------------------------
+'   Add category names
+'   -----------------------------------
+    Dim categoryNames() As String
+    categoryNames = Split("Greatest % Increase|Greatest % Decrease|Greatest Total Volume", "|")
+    For i = 0 To UBound(categoryNames)
+        CurrentWS.Cells(i + 2, 7).Value = categoryNames(i)
+    Next i
+'   -----------------------------------
+'   Add formatting
+'   -----------------------------------
+    With CurrentWS
+        With .Cells
+            .HorizontalAlignment = xlCenter
+            .EntireColumn.AutoFit
+        End With
+        With .Range("A1:E1, G1:I1")
+            .Interior.Color = RGB(200, 200, 200)
+            .Borders.Color = 0
+            .WrapText = True
+        End With
+        .Range("G2:I4, A2:E" & theStocks.Count + 1).Borders.Color = 0
+        .Range("D2:D" & theStocks.Count + 1 & ",I2:I3").NumberFormat = "0.00%"
+        With .Columns("C")
+            .FormatConditions.Add(xlCellValue, xlGreater, "=0") _
+                .Interior.Color = RGB(50, 255, 50)
+            .FormatConditions.Add(xlCellValue, xlLess, "=0") _
+                .Interior.Color = RGB(255, 50, 50)
+        End With
+        .Range("C1").FormatConditions.Delete
+    End With
+'   -----------------------------------
+'   Get stop time & display duration
+'   -----------------------------------
+    stopTime = Timer
+    totalTime = Round(stopTime - startTime, 2)
+    With CurrentWS
+        With .Range("G8")
+            .Value = "Duration:"
+            .Interior.Color = RGB(200, 200, 200)
+            .Borders.Color = 0
+        End With
+        With .Range("G9")
+            .Value = totalTime & " seconds"
+            .Borders.Color = 0
+        End With
+    End With
+    
 End Sub
 
-' ------------------------------------
+' --------------------------------------------
 ' Util to check if object exists in collection
-' (weird VBA workaround using error handler)
-' ------------------------------------
+' (weird VBA workaround using error handling)
+' --------------------------------------------
 Function ExistsInCollection(ByVal key As String, _
                             ByRef coll As Collection) _
                             As Boolean
@@ -186,11 +189,4 @@ Function ExistsInCollection(ByVal key As String, _
 err:
         ' Error handler just returns false
         ExistsInCollection = False
-End Function
-
-' ------------------------------------
-' Util to extract year from date Long
-' ------------------------------------
-Function YearFromDate(fullDate As Long)
-    YearFromDate = (fullDate - fullDate Mod 10000) / 10000
 End Function
