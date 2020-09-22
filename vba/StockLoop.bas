@@ -112,17 +112,20 @@ Sub StockLoop()
 '   -----------------------------------
     With CurrentWS
         .Range("H2").Value = greatestPctIncrease.TickerID
-        .Range("I2").Value = greatestPctIncrease.PercentChange
+        .Range("I2").Value = greatestPctIncrease.StockYear
+        .Range("J2").Value = greatestPctIncrease.PercentChange
         .Range("H3").Value = greatestPctDecrease.TickerID
-        .Range("I3").Value = greatestPctDecrease.PercentChange
+        .Range("I3").Value = greatestPctDecrease.StockYear
+        .Range("J3").Value = greatestPctDecrease.PercentChange
         .Range("H4").Value = greatestTotalVolume.TickerID
-        .Range("I4").Value = greatestTotalVolume.TotalVolume
+        .Range("I4").Value = greatestTotalVolume.StockYear
+        .Range("J4").Value = greatestTotalVolume.TotalVolume
     End With
 '   -----------------------------------
 '   Add header titles
 '   -----------------------------------
     Dim headerTitles() As String
-    headerTitles = Split("Ticker|Year|Yearly Change|Percent Change|Total Stock Volume||Category|Ticker|Value", "|")
+    headerTitles = Split("Ticker|Year|Yearly Change|Percent Change|Total Stock Volume||Category|Ticker|Year|Value", "|")
     For i = 0 To UBound(headerTitles)
         CurrentWS.Cells(1, i + 1).Value = headerTitles(i)
     Next i
@@ -142,13 +145,14 @@ Sub StockLoop()
             .HorizontalAlignment = xlCenter
             .EntireColumn.AutoFit
         End With
-        With .Range("A1:E1, G1:I1")
+        .Columns("F").ColumnWidth = 2
+        With .Range("A1:E1, G1:J1")
             .Interior.Color = RGB(200, 200, 200)
             .Borders.Color = 0
             .WrapText = True
         End With
-        .Range("G2:I4, A2:E" & theStocks.Count + 1).Borders.Color = 0
-        .Range("D2:D" & theStocks.Count + 1 & ",I2:I3").NumberFormat = "0.00%"
+        .Range("G2:J4, A2:E" & theStocks.Count + 1).Borders.Color = 0
+        .Range("D2:D" & theStocks.Count + 1 & ",J2:J3").NumberFormat = "0.00%"
         With .Columns("C")
             .FormatConditions.Add(xlCellValue, xlGreater, "=0") _
                 .Interior.Color = RGB(50, 255, 50)
@@ -194,3 +198,5 @@ err:
         ' Error handler just returns false
         ExistsInCollection = False
 End Function
+
+
