@@ -24,18 +24,22 @@ Sub StockLoop()
         lastRow = CurrentWS.Cells(Rows.Count, 1).End(xlUp).row
         Dim i As Long
     '   -----------------------------------
-    '   Loop #2: Get data from CurrentWS
+    '   Copy data from Range to 2D array
     '   -----------------------------------
         Dim sheetData As Variant
         sheetData = CurrentWS.Range("A2:G" & lastRow).Value
-        
+    '   -----------------------------------
+    '   Loop #2: Get data from 2D array
+    '   -----------------------------------
         Dim theStock As CStock
         Dim theYear As Integer
         Dim id As String
         Dim exists As Boolean
         For i = 1 To UBound(sheetData, 1)
             theYear = Round(sheetData(i, 2) / 10000, 0)
+            ' Unique ID for each stock, for each year
             id = sheetData(i, 1) & "_" & theYear
+            ' Custom util function (below end sub)
             exists = ExistsInCollection(id, theStocks)
             If exists = False Then
                 Set theStock = New CStock
@@ -65,17 +69,17 @@ Sub StockLoop()
     Set CurrentWS = ActiveWorkbook.Sheets.Add
     CurrentWS.Name = "Analysis"
 '   -----------------------------------
-'   Greatest category variables
+'   Instantiate the record-holders
 '   -----------------------------------
     Dim greatestPctIncrease, _
         greatestPctDecrease, _
         greatestTotalVolume _
-    As CStock
+        As CStock
     Set greatestPctIncrease = New CStock
     Set greatestPctDecrease = New CStock
     Set greatestTotalVolume = New CStock
 '   ------------------------------------------
-'   Loop #3: Find the greatests
+'   Loop #3: Find the record-holders
 '   ------------------------------------------
     Dim aStock As CStock
     For Each aStock In theStocks
@@ -104,7 +108,7 @@ Sub StockLoop()
         End With
     Next aStock
 '   -----------------------------------
-'   Populate greatest categories table
+'   Populate record-holders table
 '   -----------------------------------
     With CurrentWS
         .Range("H2").Value = greatestPctIncrease.TickerID
