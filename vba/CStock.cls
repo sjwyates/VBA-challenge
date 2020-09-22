@@ -8,7 +8,6 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
-
 ' ----------------------------------
 ' Declare fields
 ' ----------------------------------
@@ -19,7 +18,6 @@ Private mStockInitialDate As Long
 Private mStockFinalValue As Double
 Private mStockFinalDate As Long
 Private mStockTotalVolume As Variant
-
 ' ----------------------------------
 ' Getters
 ' ----------------------------------
@@ -46,7 +44,6 @@ Property Get PercentChange() As Double
         PercentChange = (mStockFinalValue - mStockInitialValue) / mStockInitialValue
     End If
 End Property
-
 ' ----------------------------------
 ' Setters
 ' ----------------------------------
@@ -57,7 +54,6 @@ End Property
 Property Let StockYear(ByVal theYear As Integer)
     mStockYear = theYear
 End Property
-
 ' ----------------------------------------
 ' Set initial values
 ' ----------------------------------------
@@ -71,9 +67,8 @@ Public Sub InitializeValues(ByVal theOpeningValue As Double, _
     mStockFinalDate = theDate
     mStockTotalVolume = theTotalVolume
 End Sub
-
 ' ----------------------------------------
-' "Double setter" for initial/final values
+' Check whether values need to update
 ' ----------------------------------------
 Public Sub UpdateValues(ByVal theOpeningValue As Double, _
                               ByVal theClosingValue As Double, _
@@ -88,7 +83,6 @@ Public Sub UpdateValues(ByVal theOpeningValue As Double, _
     End If
     mStockTotalVolume = mStockTotalVolume + theTotalVolume
 End Sub
-
 ' ----------------------------------
 ' Constructor
 ' ----------------------------------
