@@ -75,26 +75,26 @@ That's how the first part works. A few things to note:
 - Copying the data by value into a 2-dimensional array first, then looping over the array is MUCH faster than looping over *Range* objects in the spreadsheet
 - By indexing each *CStock* object in *theStocks* by key, I was able to use a simple lookup instead of a loop, which shaves off a bit of time as well
 
-### Step 3: Looping through the collection
+### Step 3: Analyzing and rendering the collection
 
 At this point, nothing has actually been rendered to the worksheet itself. That was a deliberate choice: Rendering is expensive (similar to how looping over the sheet is more expensive than looping over an array) so I wanted to make that the very last step.
 
 But first, for the bonus problem I instantiated some *CStock* objects for each category, then looped over *theStocks* using a For Each loop, each time checking to see whether that stock beats any of the current record-holders.
 
-Finally, I looped over *theStocks* again to populate values in the main table. (I initially had both in the same loop, but decided to separate out that logic for neatness.) Then I populated the greatests table.
+Next, I looped over *theStocks* again to populate values in the main table. (I initially had both in the same loop, but decided to separate out that logic for neatness.) To make the data a little more organized, I sorted the main table by ticker, then year, so that you could see what happened to a particular stock on consecutive years.
 
-### Step 4: Headers and formatting
+Then I populated the record-holders table. To make things a little less hard-coded, I added all the record-holders to a new collection so that I could loop over it, rather than repeat the same "this goes here, that goes there" code 9 times.
 
-Lastly, some housekeeping. I wrote a few loops to populate all the header and category titles, using a neat little workaround to easily create an array of strings with the *Split* method as a sort of pseudo-array literal. (VBA supposedly has array literals, but I struggled to get those to work.)
+And lastly, I added the header and category titles, using a neat little workaround to easily create an array of strings with the *Split* method as a sort of pseudo-array literal. (VBA supposedly has array literals, but I struggled to get those to work.)
 
-Then the formatting:
+### Step 4: Formatting
 
-1. Quick global reset: Align everything center and do an AutoFit to make it more readable
-2. Add some table borders, as well as some shading and text wrapping for the headers
-3. Add conditional formatting to the entire yearly change column, then delete that formatting from the header cell
+Now the most important part: Make it look nice, starting with the basic stuff. I aligned everything center to make it more readable, then added table borders, as well as some shading in the headers. I also opted to AutoFit the table body contents to make sure every value looks like it was supposed to (no one likes to see a bunch of ####### and scientific notation randomly mixed in), and added WrapText for the headers (no one likes columns that are way wider than they need to be.)
+
+Next, the conditional formatting. Initially I just used a simple boolean (more than zero = green, less than zero = red) for the yearly change, but decided it was pretty glaring and not very meaningful, so I went with a 3-color scale for the percent change instead. It was a bit more difficult, but it made a huge improvement.
 
 ### Summary
 
-I probably went a little too crazy with this assignment, but I'm really happy with the outcome. Besides making it fast, I also sought to make the code fairly clean and organized, and implementing OOP was a big part of that. VBA throws you a lot of curveballs, but that only makes it more satisfying when you get it to work.
+I probably went a little too crazy with this assignment, but I'm really happy with the outcome. Besides making it fast and look nice, I also sought to make the code fairly clean and organized, and implementing OOP was a big part of that. VBA throws you a lot of curveballs, but that only makes it more satisfying when you get it to work.
 
 Feel free to reach our if you have any questions, comments, suggestions, etc.
