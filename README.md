@@ -26,7 +26,7 @@ As it turns out, VBA is somewhat OOP-friendly, although it took a lot of work tr
 
 - It doesn't support class-based inheritance, although I wasn't going to use that anyway
 - There are access modifiers, as well as getters and setters, so it supports abstraction/encapsulation
-- You can't pass any arguments to the constructor, so it's really just for creating/assigning a random unique ID
+- You can't pass any arguments to the constructor, so you have to use setters to set initial values
 
 I also wanted to see if VBA had anything resembling Java's *Collection* class, or any of its subclasses. Turns out it has one, and it does some things Java collections can do, with some glaring exceptions:
 
