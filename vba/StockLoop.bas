@@ -122,7 +122,11 @@ Sub StockLoop()
         With CurrentWS
             .Cells(i, 8).Value = aStock.TickerID
             .Cells(i, 9).Value = aStock.StockYear
-            .Cells(i, 10).Value = aStock.PercentChange
+            If i < 4 Then
+                .Cells(i, 10).Value = aStock.PercentChange
+            Else
+                .Cells(i, 10).Value = aStock.TotalVolume
+            End If
         End With
         i = i + 1
     Next aStock
