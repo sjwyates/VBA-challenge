@@ -16,7 +16,7 @@ Before I go through the many details, here's the end product, with a little time
 
 ![Demonstration](images/vba-stock-demo-syates.gif)
 
-As you can see, it takes a little under 14 seconds to process a fairly large dataset (although without the screen recorder running it's more like 9 seconds). To achieve this, I went a little deeper into VBA than I probably should have, but I really enjoyed working on it. If you're interested, here's an overly detailed explanation on how I approached the problem.
+As you can see, it takes a little under 12 seconds to process a fairly large dataset (although without the screen recorder running it's more like 9 seconds). To achieve this, I went a little deeper into VBA than I probably should have, but I really enjoyed working on it. If you're interested, here's an overly detailed explanation on how I approached the problem.
 
 ## Object-oriented programming in VBA
 
