@@ -18,9 +18,25 @@ Before I go through the many details, here's the end product, with a little time
 
 As you can see, it takes a little under 14 seconds to process a fairly large dataset (although without the screen recorder running it's more like 9 seconds). To achieve this, I went a little deeper into VBA than I probably should have, but I really enjoyed working on it. If you're interested, here's an overly detailed explanation on how I approached the problem.
 
-## Object-oriented programming in VBA
+## Implementation 1: The simpler way
 
-As someone with a little background in Java and C#, one of my first thoughts was, "Can I use OOP?"
+The straightforward implementation is to let the worksheet be your main source of truth. I was initially resistant to this because the worksheet's not a very efficient data structure, it's a bulky collection of *Range* objects. You have to loop over them and call their *Value* getter just to retrieve a string or an integer, and then loop over some other *Range* objects and call their *Value* setter to store the results. I'm more inclined to deal with the worksheet as little as possible and instead use more streamlined data structures, so I only tried out the simpler approach after I'd already done it the hard way.
+
+### How it works:
+
+It starts out by setting the value of *yearlyOpen* to the open value for the first row, and *totalVolume* to 0. It loops over each row, increments *totalVolume* by the volume, then there's an If block that checks if the ticker is different than the next row. If it's not, keep looping. If it is, that means it's the last row for that stock, so it sets *yearlyClose* to the closing value.
+
+That's all the raw data we need to calculate *yearlyChange* and *percentChange*, so it does that and populates a new row for that stock on the analysis table. Then the If block does some housekeeping - ie, it resets *totalVolume* to 0 and *yearlyOpen* to the open value for the next row, and also increments the row counter for the analysis table.
+
+Once the analysis table is populated, there's another loop that goes and finds the record holders, and then that table gets populated. Then more housekeeping: Add in the row headers and record-holder category titles, do some formatting, then some conditional formatting. (More explanation of that part below).
+
+Performance-wise, this is a little over twice as slow as the more complicated implementation (roughly 22 seconds for the full dataset, compared to 9). Not terrible, but also not great. Why not make it better?
+
+## Implementation 2: The way more complicated way
+
+### Intro: Object-oriented programming in VBA
+
+That was one way to do it, but as someone with a little background in Java and C#, I really wanted to explore what VBA has to offer (or doesn't).
 
 As it turns out, VBA is somewhat OOP-friendly, although it took a lot of work trying to navigate its many limitations and quirks. For instance, there is a type of Module called *Class Module* - which is a good start - but it's a mixed bag:
 
@@ -36,8 +52,6 @@ I also wanted to see if VBA had anything resembling Java's *Collection* class, o
 - Unlike arrays, you can't specify a type, so everything you add to it ends up as a *Variant*, which carries some risk since you have no control over what ends up in there
 
 There is a way to write your own custom collection classes to get around the whole *Variant* issue, but it turns out it's completely bonkers, so I abandoned that idea and went with the built-in Collection class.
-
-## Implementation
 
 ### Step 1: Build the *CStock* class
 
@@ -72,7 +86,7 @@ Based on the new value of *exists*, we do one of 2 things:
 
 That's how the first part works. A few things to note:
 
-- Copying the data by value into a 2-dimensional array first, then looping over the array is MUCH faster than looping over *Range* objects in the spreadsheet
+- Copying the data by value into a 2-dimensional array first, then looping over the array is significantly faster than looping over *Range* objects in the spreadsheet
 - By indexing each *CStock* object in *theStocks* by key, I was able to use a simple lookup instead of a loop, which shaves off a bit of time as well
 
 ### Step 3: Analyzing and rendering the collection
