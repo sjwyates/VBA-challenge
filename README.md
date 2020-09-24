@@ -16,7 +16,7 @@ Before I go through the many details, here's the end product, with a little time
 
 ![Demonstration](images/vba-stock-demo-syates.gif)
 
-As you can see, it takes a little under 14 seconds to process a fairly large dataset (although without the screen recorder running it's more like 9 seconds). To achieve this, I went a little deeper into VBA than I probably should have, but I really enjoyed working on it. If you're interested, here's an overly detailed explanation on how I approached the problem.
+As you can see, it takes a little under 12 seconds to process a fairly large dataset (although without the screen recorder running it's more like 9 seconds). To achieve this, I went a little deeper into VBA than I probably should have, but I really enjoyed working on it. If you're interested, here's an overly detailed explanation on how I approached the problem.
 
 ## Implementation 1: The simpler way
 
@@ -42,7 +42,7 @@ As it turns out, VBA is somewhat OOP-friendly, although it took a lot of work tr
 
 - It doesn't support class-based inheritance, although I wasn't going to use that anyway
 - There are access modifiers, as well as getters and setters, so it supports abstraction/encapsulation
-- You can't pass any arguments to the constructor, so it's really just for creating/assigning a random unique ID
+- You can't pass any arguments to the constructor, so you have to use setters to set initial values
 
 I also wanted to see if VBA had anything resembling Java's *Collection* class, or any of its subclasses. Turns out it has one, and it does some things Java collections can do, with some glaring exceptions:
 
